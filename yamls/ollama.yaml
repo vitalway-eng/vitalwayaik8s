@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ollama
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-storage
+  namespace: ollama
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "longhorn-redis-storage"
+  resources:
+    requests:
+      storage: 128Gi # Adjust size based on how many LLMs you want to download
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          ports:
+            - containerPort: 11434
+              name: http
+          volumeMounts:
+            - name: ollama-volume
+              mountPath: /root/.ollama # Persists the downloaded LLMs
+          resources:
+            limits:
+              nvidia.com/gpu: "1" # Remove or comment out this block if you only use CPU
+            requests:
+              nvidia.com/gpu: "1" # Remove or comment out this block if you only use CPU
+      volumes:
+        - name: ollama-volume
+          persistentVolumeClaim:
+            claimName: ollama-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-service
+  namespace: ollama
+spec:
+  type: ClusterIP # Change to NodePort or LoadBalancer if exposing outside the cluster
+  selector:
+    app: ollama
+  ports:
+    - port: 11434
+      targetPort: 11434
+      protocol: TCP
+      name: http
