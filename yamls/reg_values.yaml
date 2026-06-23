@@ -1,0 +1,39 @@
+# values.yaml
+persistence:
+  enabled: true
+  size: 20Gi
+  accessMode: ReadWriteOnce
+  storageClassName: "longhorn-redis-storage"
+
+# Optional: Expose via Ingress if you want external access
+service:
+  type: ClusterIP
+  port: 5000
+  # Assigns your specific external static or MetalLB IP address
+  loadBalancerIP: "192.168.8.54"  # <-- Replace with your target External IP
+
+# Instructs the registry daemon to look for the htpasswd secret file mount
+secrets:
+  htpasswd: "" # Leave empty here; we will inject this safely using a file flag
+
+# Enable and configure the Ingress resource for HTTPS
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    # Essential: Allow large container layers to be uploaded without HTTP 413 errors
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    # Enable automatic TLS generation via cert-manager
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - gx10-3fe2  # Replace with your actual domain name
+  tls:
+    - secretName: docker-registry-tls
+      hosts:
+        - gx10-3fe2  # Replace with your actual domain name
+
+configData:
+  auth:
+    htpasswd:
+      realm: "Registry Realm"
+      path: /auth/htpasswd

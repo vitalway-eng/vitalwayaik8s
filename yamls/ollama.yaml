@@ -1,13 +1,8 @@
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: ollama
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ollama-storage
-  namespace: ollama
+  namespace: vitalwayai
 spec:
   accessModes:
     - ReadWriteOnce
@@ -20,7 +15,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ollama
-  namespace: ollama
+  namespace: vitalwayai
 spec:
   replicas: 1
   selector:
@@ -40,11 +35,9 @@ spec:
           volumeMounts:
             - name: ollama-volume
               mountPath: /root/.ollama # Persists the downloaded LLMs
-          resources:
+          resources: # ADD This Block
             limits:
-              nvidia.com/gpu: "1" # Remove or comment out this block if you only use CPU
-            requests:
-              nvidia.com/gpu: "1" # Remove or comment out this block if you only use CPU
+              nvidia.com/gpu: 1 
       volumes:
         - name: ollama-volume
           persistentVolumeClaim:
@@ -54,7 +47,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ollama-service
-  namespace: ollama
+  namespace: vitalwayai
 spec:
   type: ClusterIP # Change to NodePort or LoadBalancer if exposing outside the cluster
   selector:
@@ -64,3 +57,4 @@ spec:
       targetPort: 11434
       protocol: TCP
       name: http
+

@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: registry-pvc
+  namespace: vitalwayai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "longhorn-redis-storage"
+  resources:
+    requests:
+      storage: 50Gi
+
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: registry-replicaset
+  namespace: vitalwayai
+  labels:
+    app: docker-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker-registry
+  template:
+    metadata:
+      namespace: vitalwayai
+      labels:
+        app: docker-registry
+    spec:
+      containers:
+      - name: registry
+        image: docker.io/library/registry:latest
+        ports:
+        - containerPort: 5000
+          name: registry-https
+        env:
+        - name: REGISTRY_AUTH
+          value: "htpasswd"
+        - name: REGISTRY_AUTH_HTPASSWD_REALM
+          value: "Registry Realm"
+        - name: REGISTRY_AUTH_HTPASSWD_PATH
+          value: "/auth"
+        - name: REGISTRY_HTTP_SECRET
+          value: "/auth"
+        # Enable HTTPS inside the Registry container
+        - name: REGISTRY_HTTP_TLS_CERTIFICATE
+          value: /certs/tls.crt
+        - name: REGISTRY_HTTP_TLS_KEY
+          value: /certs/tls.key
+        volumeMounts:
+        # Mount for stable image storage
+        - name: registry-storage
+          mountPath: /var/lib/registry
+        # Mount for TLS certificates
+        - name: registry-certs
+          mountPath: /certs
+          readOnly: true
+        - name: registry-http-auth
+          mountPath: /auth
+          readOnly: true
+      volumes:
+      # Persistent Volume Claim Link
+      - name: registry-storage
+        persistentVolumeClaim:
+          claimName: registry-pvc
+      # Secret Link
+      - name: registry-certs
+        secret:
+          secretName: registry-secret
+      - name: registry-http-auth
+        secret:
+          secretName: registry-auth  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry-service
+  namespace: vitalwayai
+spec:
+  externalIPs:
+    - 192.168.8.54
+  ports:
+  - port: 5000
+    targetPort: registry-https
+  selector:
+    app: docker-registry
+

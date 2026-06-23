@@ -8,3 +8,4 @@ cluster-config:
 EOF
 sudo k8s enable dns network ingress load-balancer local-storage gateway
 sudo k8s status
+sudo snap install kubectl --classic

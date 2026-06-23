@@ -1,0 +1,17 @@
+# values.yaml
+persistence:
+  enabled: true
+  size: 20Gi
+  accessMode: ReadWriteOnce
+
+# Optional: Expose via Ingress if you want external access
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - registry.local
+  tls:
+    - secretName: registry-tls
+      hosts:
+        - registry.local
+
