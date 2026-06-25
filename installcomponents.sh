@@ -22,3 +22,5 @@ k8s kubectl apply -f yamls/mysql.yaml
 
 k8s kubectl create secret docker-registry github-registry-pull-secret --docker-server=https://ghcr.io   --docker-username=vitalway-eng --docker-password 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   --docker-email=kuldeep.apte@vitalway.ai   --namespace=vitalwayai
 k8s kubectl apply -f yamls/pickdocstoinfere.yml
+ 
+mysql -u root -p -h 192.168.8.55 -e "CREATE USER 'root'@'192.168.8.54' IDENTIFIED BY 'Vtw123$%^'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.8.54' WITH GRANT OPTION; FLUSH PRIVILEGES;"
