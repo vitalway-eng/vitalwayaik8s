@@ -31,7 +31,18 @@ spec:
       - name: infereollama
         image: ghcr.io/vitalway-eng/vitalaiollama:1.0
         imagePullPolicy: Always
+        resources:
+          limits:
+            nvidia.com/gpu: "1" # Request exactly 1 NVIDIA GPU
         env:
+          - name: DATABASE_HOST
+            value: "192.168.8.55"
+          - name: DATABASE_USER
+            value: "root"
+          - name: DATABASE_PASS 
+            value: "Vtw123$%^"
+          - name: DATABASE_NAME
+            value: "customerdb"
           - name: OLLAMA_HOST
             value: "192.168.8.54"
           - name: OLLAMA_MODEL
