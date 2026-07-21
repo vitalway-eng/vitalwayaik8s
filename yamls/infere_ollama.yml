@@ -27,18 +27,17 @@ spec:
       labels:
         app: infereollama
     spec:
+      nodeName: gx10-3fe2
+      hostNetwork: true
       containers:
       - name: infereollama
         image: ghcr.io/vitalway-eng/vitalaiollama:1.0
         imagePullPolicy: Always
-        resources:
-          limits:
-            nvidia.com/gpu: "1" # Request exactly 1 NVIDIA GPU
         env:
           - name: DATABASE_HOST
             value: "192.168.8.55"
           - name: DATABASE_USER
-            value: "root"
+            value: "dbuser"
           - name: DATABASE_PASS 
             value: "Vtw123$%^"
           - name: DATABASE_NAME
@@ -55,6 +54,19 @@ spec:
             value: "Vtw123$%^"
           - name: REDIS_USERNAME
             value: "default"
+          - name: TIKTOKEN_CACHE_DIR
+            value: "/app/tiktoken_cache/"
+          - name: TIKTOKEN_FILE
+            value: "cl100k_base.tiktoken"
+          - name: "CREWAI_DISABLE_TELEMETRY"
+            value: "true"
+        resources:
+          requests:
+            cpu: "5"      # Guaranteed baseline allocation (e.g., 5 cores)
+            memory: "4Gi"
+          limits:
+            cpu: "8"      # Hard ceiling: Cannot burst past 6 CPUs
+            memory: "8Gi"
         volumeMounts:
         - name: storage-volume
           mountPath: /data

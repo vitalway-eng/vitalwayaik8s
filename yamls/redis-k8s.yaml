@@ -38,6 +38,7 @@ spec:
       labels:
         app: redis
     spec:
+      nodeName: gx10-3fe2
       containers:
       - name: redis
         image: redis:8.0-alpine
@@ -64,5 +65,5 @@ spec:
       storageClassName: "longhorn-redis-storage"
       resources:
         requests:
-          storage: 20Gi
+          storage: 50Gi
 

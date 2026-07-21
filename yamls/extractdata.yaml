@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: extrcatdata-pvc
+  name: extrcat-data-pvc
   namespace: vitalwayai
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
+      storage: 2Gi
 
 ---
 apiVersion: apps/v1
@@ -44,6 +44,13 @@ spec:
             value: "Vtw123$%^"
           - name: REDIS_USERNAME
             value: "default"
+        resources:
+          requests:
+            cpu: "3"      # Guaranteed baseline allocation (e.g., 5 cores)
+            memory: "4Gi"
+          limits:
+            cpu: "4"      # Hard ceiling: Cannot burst past 6 CPUs
+            memory: "6Gi"
         volumeMounts:
         - name: storage-volume
           mountPath: /data
@@ -56,4 +63,4 @@ spec:
       volumes:
       - name: storage-volume
         persistentVolumeClaim:
-          claimName: extrcatdata-pvc
+          claimName: extrcat-data-pvc
